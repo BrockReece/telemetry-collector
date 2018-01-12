@@ -30,7 +30,7 @@ io.use((socket, next) => {
 });
 
 io.on('connection', function(socket){
-    console.log('a user connected');
+    console.log('a user connected: ' + socket.id);
     socket.on('disconnect', function(){
         console.log('user disconnected');
     });
@@ -41,6 +41,8 @@ io.on('connection', function(socket){
             type: body.type,
             body: {
                 timestamp: new Date().toISOString(),
+                session_id: socket.id,
+                referer: socket.handshake.headers.referer,
                 ...body
             },
         })
