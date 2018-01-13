@@ -49,6 +49,33 @@ io.on('connection', function(socket){
     })
 });
 
+app.get('/', function (req, res) {
+    client.search({
+        index: 'telemetry',
+        body: {
+            size: 0,
+            query: {
+                term: { "referer.raw": req.query.referer, }
+            },
+            aggs: {
+                urls: {
+                    terms: { field: "name.raw" },
+                    aggs: {
+                        start: {
+                            avg: { field: "fetchStart" }
+                        },
+                        duration: {
+                            avg: { field: "duration" }
+                        },
+                    },
+                }
+            }
+        },
+    }).then((results) => {
+        res.json(results)
+    }).catch(res.json)
+});
+
 http.listen(process.env.NODE_PORT || 3000, function(){
     console.log('listening on *:' + process.env.NODE_PORT || 3000);
 });
