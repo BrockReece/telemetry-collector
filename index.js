@@ -62,10 +62,16 @@ app.get('/', function (req, res) {
                     terms: { field: "name.raw" },
                     aggs: {
                         start: {
-                            avg: { field: "fetchStart" }
+                            avg: { field: "startTime" }
                         },
                         duration: {
                             avg: { field: "duration" }
+                        },
+                        request: {
+                            avg: { field: "requestStart" }
+                        },
+                        end: {
+                            avg: { field: "responseEnd" }
                         },
                     },
                 }
