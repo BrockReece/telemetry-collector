@@ -49,13 +49,52 @@ io.on('connection', function(socket){
     })
 });
 
-app.get('/', function (req, res) {
+app.get('/users', function (req, res) {
+    const filters = Object.keys(req.query).map((key) => {
+        const name = ['user_id'].indexOf(key) === - 1 ? `${key}.raw` : key
+        return {
+            term: { [name]: req.query[key], },
+        }
+    })
+
     client.search({
         index: 'telemetry',
         body: {
             size: 0,
             query: {
-                term: { "referer.raw": req.query.referer, }
+                bool: {
+                    filter: filters,
+                },
+            },
+            aggs: {
+                users: {
+                    terms: {
+                        field: "user_id.raw",
+                    },
+                }
+            }
+        },
+    }).then((results) => {
+        res.json(results)
+    }).catch(err => res.json(err))
+})
+
+app.get('/', function (req, res) {
+    const filters = Object.keys(req.query).map((key) => {
+        const name = ['user_id'].indexOf(key) === - 1 ? `${key}.raw` : key
+        return {
+            term: { [name]: req.query[key], },
+        }
+    })
+
+    client.search({
+        index: 'telemetry',
+        body: {
+            size: 0,
+            query: {
+                bool: {
+                    filter: filters,
+                },
             },
             aggs: {
                 urls: {
@@ -79,7 +118,7 @@ app.get('/', function (req, res) {
         },
     }).then((results) => {
         res.json(results)
-    }).catch(res.json)
+    }).catch(err => res.json(err))
 });
 
 http.listen(process.env.NODE_PORT || 3000, function(){
