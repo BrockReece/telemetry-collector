@@ -1,6 +1,7 @@
+
 var app = require('express')();
 var http = require('http').Server(app);
-var elasticsearch = require('elasticsearch');
+var { buildFilters, simpleAggregation, client } = require('./modules/elastic')
 var jwtDecode = require('jwt-decode');
 var io = require('socket.io')(http, {
     handlePreflightRequest(req, res) {
@@ -11,10 +12,6 @@ var io = require('socket.io')(http, {
         });
         res.end();
     }
-});
-
-var client = new elasticsearch.Client({
-    host: process.env.ELASTIC_HOST || '192.168.99.100:9200',
 });
 
 var users = process.env.ALLOWED_USERS || [2117]
@@ -49,34 +46,16 @@ io.on('connection', function(socket){
     })
 });
 
-app.get('/users', function (req, res) {
-    const filters = Object.keys(req.query).map((key) => {
-        const name = ['user_id'].indexOf(key) === - 1 ? `${key}.raw` : key
-        return {
-            term: { [name]: req.query[key], },
-        }
-    })
+[{ url: '/users', field: 'user_id.raw' }, { url: '/session', field: 'session_id.raw' }].forEach((route) => {
+    app.get(route.url, function (req, res) {
+        const filters = buildFilters(req.query)
 
-    client.search({
-        index: 'telemetry',
-        body: {
-            size: 0,
-            query: {
-                bool: {
-                    filter: filters,
-                },
-            },
-            aggs: {
-                users: {
-                    terms: {
-                        field: "user_id.raw",
-                    },
-                }
-            }
-        },
-    }).then((results) => {
-        res.json(results)
-    }).catch(err => res.json(err))
+        simpleAggregation(route.field, filters)
+            .then((results) => {
+                res.json(results)
+            })
+            .catch(err => res.json(err))
+    })
 })
 
 app.get('/', function (req, res) {
