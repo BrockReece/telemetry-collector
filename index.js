@@ -46,7 +46,7 @@ io.on('connection', function(socket){
     })
 });
 
-[{ url: '/users', field: 'user_id.raw' }, { url: '/session', field: 'session_id.raw' }].forEach((route) => {
+[{ url: '/users', field: 'user_id.raw' }, { url: '/sessions', field: 'session_id.raw' }].forEach((route) => {
     app.get(route.url, function (req, res) {
         const filters = buildFilters(req.query)
 
