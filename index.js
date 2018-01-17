@@ -1,5 +1,6 @@
 
 var app = require('express')();
+var cors = require('cors')
 var http = require('http').Server(app);
 var { buildFilters, simpleAggregation, client } = require('./modules/elastic')
 var jwtDecode = require('jwt-decode');
@@ -16,6 +17,7 @@ var io = require('socket.io')(http, {
 
 var users = process.env.ALLOWED_USERS || [2117]
 
+app.use(cors())
 // socket authorization middleware
 io.use((socket, next) => {
     let token = jwtDecode(socket.handshake.headers['authorization'].replace('Bearer ', ''));
