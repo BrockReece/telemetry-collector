@@ -48,7 +48,11 @@ io.on('connection', function(socket){
     })
 });
 
-[{ url: '/users', field: 'user_id.raw' }, { url: '/sessions', field: 'session_id.raw' }].forEach((route) => {
+[
+    { url: '/users', field: 'user_id.raw' },
+    { url: '/sessions', field: 'session_id.raw' },
+    { url: '/referers', field: 'referers.raw' },
+].forEach((route) => {
     app.get(route.url, function (req, res) {
         const filters = buildFilters(req.query)
 
@@ -94,14 +98,25 @@ app.get('/', function (req, res) {
                             avg: { field: "responseEnd" }
                         },
                     },
-                }
-            }
+                },
+                bandwidth: {
+                    histogram: {
+                      field: 'connection.downlink',
+                      interval: 1,
+                      min_doc_count: 0,
+                    },
+                },
+            },
         },
     }).then((results) => {
         res.json(results)
     }).catch(err => res.json(err))
 });
 
-http.listen(process.env.NODE_PORT || 3000, function(){
-    console.log('listening on *:' + process.env.NODE_PORT || 3000);
+app.get('/test', function (req, res) {
+    res.send('test')
+})
+
+http.listen(process.env.NODE_PORT || 80, function(){
+    console.log('listening on *:' + process.env.NODE_PORT || 80);
 });

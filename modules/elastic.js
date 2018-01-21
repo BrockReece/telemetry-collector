@@ -27,6 +27,7 @@ module.exports.simpleAggregation = (field, filter) => {
                 users: {
                     terms: {
                         field,
+                        size: 30,
                     },
                 }
             }
