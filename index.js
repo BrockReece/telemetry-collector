@@ -97,6 +97,14 @@ app.get('/', function (req, res) {
                         end: {
                             avg: { field: "responseEnd" }
                         },
+                        extra_hits: {
+                            top_hits: {
+                                _source: {
+                                    includes: [ 'initiatorType' ]
+                                },
+                                size : 1,
+                            },
+                        },
                     },
                 },
                 bandwidth: {
@@ -105,6 +113,13 @@ app.get('/', function (req, res) {
                       interval: 1,
                       min_doc_count: 0,
                     },
+                },
+                timeToInteractive: {
+                    histogram: {
+                        script: "doc['domInteractive'].value - doc['navigationStart'].value",
+                        lang: "expression",
+                        interval: 1000,
+                    }
                 },
             },
         },
