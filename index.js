@@ -83,7 +83,7 @@ app.get('/', function (req, res) {
             },
             aggs: {
                 urls: {
-                    terms: { field: "name.raw" },
+                    terms: { field: "name.raw", size: 0 },
                     aggs: {
                         start: {
                             avg: { field: "startTime" }
