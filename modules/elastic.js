@@ -7,6 +7,17 @@ const client = new elasticsearch.Client({
 module.exports.buildFilters = (query) => {
     return Object.keys(query).map((key) => {
         const name = ['user_id'].indexOf(key) === - 1 ? `${key}.raw` : key
+
+        if (key === 'loadTime') {
+            return {
+                range: { 
+                    startTime: { 
+                        lt: req.query[key], 
+                    },
+                },
+            }
+        }
+
         return {
             term: { [name]: query[key], },
         }
