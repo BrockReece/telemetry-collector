@@ -65,12 +65,7 @@ io.on('connection', function(socket){
 })
 
 app.get('/', function (req, res) {
-    const filters = Object.keys(req.query).map((key) => {
-        const name = ['user_id'].indexOf(key) === - 1 ? `${key}.raw` : key
-        return {
-            term: { [name]: req.query[key], },
-        }
-    })
+    const filters = buildFilters(req.query)
 
     client.search({
         index: 'telemetry',
