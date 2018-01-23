@@ -12,7 +12,7 @@ module.exports.buildFilters = (query) => {
             return {
                 range: { 
                     startTime: { 
-                        lt: req.query[key], 
+                        lt: query[key], 
                     },
                 },
             }
