@@ -5,7 +5,7 @@ const client = new elasticsearch.Client({
 });
 
 module.exports.buildFilters = (query) => {
-    return Object.keys(query).map((key) => {
+    const filters = Object.keys(query).map((key) => {
         const name = ['user_id'].indexOf(key) === - 1 ? `${key}.raw` : key
 
         if (key === 'loadTime') {
@@ -22,6 +22,16 @@ module.exports.buildFilters = (query) => {
             term: { [name]: query[key], },
         }
     })
+
+    filters.push({
+        range: {
+            timestamp: {
+                gte: 'day-1d/d',
+            },
+        },
+    })
+
+    return filters
 }
 
 module.exports.simpleAggregation = (field, filter) => {
